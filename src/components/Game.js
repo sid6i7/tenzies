@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import { Dice } from "./Dice";
 import Confetti from "react-confetti";
 
-export const Game = () => {
-
+export const Game = (props) => {
   const getRandomNum = () => Math.floor(Math.random() * 6 + 1);
 
   const initDices = () => {
@@ -35,6 +34,7 @@ export const Game = () => {
   };
 
   const rollDice = () => {
+    props.incrementRolls();
     setDices((oldDices) => {
       return oldDices.map((dice) => {
         if (!dice.locked) {
@@ -49,18 +49,51 @@ export const Game = () => {
     });
   };
 
+  const startGame = () => {
+    console.log(Date.now());
+    setIsStarted(true);
+  };
+
   const resetGame = () => {
     setDices(initDices());
     setIsFinished(false);
+    props.resetRolls();
+    setIsStarted(false);
+    props.setSeconds(0);
   };
 
+  const setHighScore = () => {
+    console.log(props.highscore);
+    if(props.highscore===undefined || props.seconds < props.highscore) {
+        localStorage.setItem('highscore', JSON.stringify(props.seconds));
+        props.setHighScore(props.seconds);
+        console.log('ok')
+    }
+  }
+
+  const [isStarted, setIsStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [dices, setDices] = useState(() => initDices());
 
   useEffect(() => {
     const checkArr = dices.filter((dice) => dice.num === dices[0].num);
-    setIsFinished(checkArr.length === dices.length);
+    if(checkArr.length === dices.length) {
+        setHighScore();
+        setIsFinished(true);
+        console.log('okaokaokaoka');
+    }
+    
   }, [dices]);
+
+  useEffect(() => {
+    let intervalId;
+    if(isStarted && !isFinished) {
+        intervalId = setInterval(() => {
+            props.setSeconds(time => Math.floor(time+1));
+        }, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isStarted, props.seconds])
 
   return (
     <div id="game">
@@ -84,9 +117,19 @@ export const Game = () => {
           );
         })}
       </div>
-      <button id="game--btn" onClick={isFinished ? resetGame : rollDice}>
-        {isFinished ? "Reset" : "Roll"}
-      </button>
+      <div id="game--btn-container">
+        <button
+          className="game--btn"
+          onClick={isStarted ? resetGame : startGame}
+        >
+          {isStarted ? "RESET" : "START"}
+        </button>
+        {isStarted && !isFinished && (
+          <button className="game--btn" onClick={rollDice}>
+            ROLL
+          </button>
+        )}
+      </div>
     </div>
   );
 };
