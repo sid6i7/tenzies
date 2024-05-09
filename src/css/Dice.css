@@ -1,0 +1,22 @@
+.dice {
+    height: 50px;
+    width: 50px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0px 2px 2px 0px #00000026;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dice--num {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    font-size: 34px;
+}
+
+.green-bg {
+    background-color: #59E391;
+}
